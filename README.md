@@ -1,5 +1,7 @@
 # PitchPerfect
 
+Change theses assignments and descriptions around as agreed between you and other classmates.
+
 ## Jay
 **dataload.py**
 
