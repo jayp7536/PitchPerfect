@@ -1,5 +1,7 @@
 # PitchPerfect
 
+Change theses assignments and descriptions around as agreed between you and other classmates.
+
 ## Jay
 **dataload.py**
 
@@ -32,6 +34,7 @@ Model evaluation and performance metric implementation, including accuracy, prec
 
 ## Jonah
 **LLM.py**
+
 **main.py**
 
 Hyperparameter tuning and experimentation with model settings such as n-gram ranges and feature limits. LLM performance comparison, including
