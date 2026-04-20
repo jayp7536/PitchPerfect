@@ -5,6 +5,7 @@
 #       clean data (Jay)
 
 import pandas as pd
+import re
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder    
 
@@ -31,6 +32,9 @@ class dataloaderLANG():
 
         # remove duplicates
         df = df.drop_duplicates(subset=["lyrics", "artist"])
+
+        # clean lyrics
+        df["lyrics"] = df["lyrics"].apply(self.clean_text)
 
         # (100 songs per artist)
         df = df.groupby("artist").filter(lambda x: len(x) >= 100)
@@ -64,19 +68,19 @@ class dataloaderLANG():
 
 
 
-def clean_text(self, text):
-    text = text.lower()
+    def clean_text(self, text):
+        text = text.lower()
 
-    #remove bracketed text
-    text = re.sub(r"\[.*?\]", "", text)
-    #remove newlines
-    text = text.replace("\n", " ")
-    #remove punctuation 
-    text = re.sub(r"[^\w\s]", "", text)
-    # remove extra spaces
-    text = re.sub(r"\s+", " ", text).strip()
+        #remove bracketed text
+        text = re.sub(r"\[.*?\]", "", text)
+        #remove newlines
+        text = text.replace("\n", " ")
+        #remove punctuation 
+        text = re.sub(r"[^\w\s]", "", text)
+        # remove extra spaces
+        text = re.sub(r"\s+", " ", text).strip()
 
-    return text
+        return text
 
 
 
