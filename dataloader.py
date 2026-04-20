@@ -8,12 +8,33 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder    
 
+
+
+
+
 class dataloaderLANG():
     def __init__(self, trainsplit=0.7):
         # load dataset
         df = pd.read_csv("filtered_lyrics_top20_pop.csv")
-        # filter
+
+        # filter to english
+        lang_col = None
+        for c in df.columns:
+            if c.lower().startswith("language"):
+                lang_col = c
+                break
+
+        if lang_col is not None:
+            df = df[df[lang_col].str.lower() == "en"]
+
         df = df[["lyrics", "artist"]].dropna()
+
+        # remove duplicates
+        df = df.drop_duplicates(subset=["lyrics", "artist"])
+
+        # (100 songs per artist)
+        df = df.groupby("artist").filter(lambda x: len(x) >= 100)
+        df = df.groupby("artist").sample(n=100, random_state=42)
 
         # split data
         X = df["lyrics"]
@@ -39,9 +60,41 @@ class dataloaderLANG():
         self.TestX=X_test
         self.TestY=y_test
 
+
+
+
+
+def clean_text(self, text):
+    text = text.lower()
+
+    #remove bracketed text
+    text = re.sub(r"\[.*?\]", "", text)
+    #remove newlines
+    text = text.replace("\n", " ")
+    #remove punctuation 
+    text = re.sub(r"[^\w\s]", "", text)
+    # remove extra spaces
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
+
+
+
+
+
 if __name__ == "__main__":
     data = dataloaderLANG()
 
+    print("#------------------------------------------------- DATASET INFO #-------------------------------------------------")
     print("Train size:", len(data.TrainX))
     print("Validation size:", len(data.ValX))
     print("Test size:", len(data.TestX))
+
+    print("\n#------------------------------------------------- SAMPLE INPUT #-------------------------------------------------")
+    print(list(data.TrainX)[0])
+
+    print("\n#------------------------------------------------- LABEL INFO #-------------------------------------------------")
+    print("Encoded label:", data.TrainY[0])
+    print("Actual artist:", data.encoder.inverse_transform([data.TrainY[0]])[0])
+
+    print("\n#-------------------------------------------------#")
