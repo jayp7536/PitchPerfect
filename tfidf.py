@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score
 from dataloader import dataloaderLANG
+from metrics import evaluate_model, print_conf_matrix
 
 #note: can you add an option for n? ie: 2-gram 3-gram etc  -jonah
 #   also include args for epochs, trainingtestingsplit
@@ -31,6 +32,25 @@ def train_tfidf_model():
     print("Accuracy:", accuracy_score(y_val, pred))
     print(classification_report(y_val, pred, target_names=data.encoder.classes_))
 
+    # -----------------------------
+    # PRINT CONFUSION MATRIX IN TERMINAL
+    # -----------------------------
+    # print_conf_matrix(
+    # y_val,
+    # pred,
+    # class_names=data.encoder.classes_
+    # )
+
+    # -----------------------------
+    # SHOWS CONFUSION MATRIX IN NEW WINDOW (VISUAL)
+    # -----------------------------
+    evaluate_model(
+    y_val,
+    pred,
+    class_names=data.encoder.classes_,
+    model_name="TF-IDF CHARACTER N-GRAMS"
+    )
+    
     return model, vectorizer
 
 if __name__ == "__main__":
