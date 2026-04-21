@@ -2,7 +2,7 @@
 #   container for LLM class(es)
 from transformers import BertTokenizer, BertModel
 import torch
-from jeb382private import Bertize #prviate file
+from jeb382private import Bertize #private file
 
 #helper module
 class Squeezer(torch.nn.Module):
