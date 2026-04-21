@@ -7,6 +7,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score
 from dataloader import dataloaderLANG
 
+#note: can you add an option for n? ie: 2-gram 3-gram etc  -jonah
+#   also include args for epochs, trainingtestingsplit
 def train_tfidf_model():
     # Load data
     data = dataloaderLANG()

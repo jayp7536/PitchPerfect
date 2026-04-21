@@ -4,6 +4,7 @@ from transformers import BertTokenizer, BertModel
 import torch
 from jeb382private import Bertize #private file
 
+
 #helper module
 class Squeezer(torch.nn.Module):
     def __init__(self):
@@ -13,6 +14,7 @@ class Squeezer(torch.nn.Module):
 
 
 
+#==============================================================================
 #idk waht to do with this tbh, looking into another LLM
 class LLM_Model():
     def __init__(self):
@@ -20,7 +22,7 @@ class LLM_Model():
     
     
     
-
+#==============================================================================
 #BERT LLM model
 class LLMBERT_Model():
     def __init__(self,num_classes=20, betterbert=False):
@@ -49,10 +51,7 @@ class LLMBERT_Model():
                 torch.nn.LayerNorm(512), 
                 torch.nn.Linear(512, num_classes),
                 torch.nn.Sigmoid()  )
-            
-        
-        
-        
+    #==============================================================================
     def forward(self,rawtext,ChunkSize=512,overlap=448,extrapool=True):
         if self.betterbert: SemEmb = Bertize(self.BERTmodel,self.tokenizer,rawtext, ChunkSize,overlap,extrapool)
         else:
@@ -64,3 +63,16 @@ class LLMBERT_Model():
             with torch.no_grad(): token_embeddings = self.model(input_ids).last_hidden_state.squeeze(0)
             
         return self.merge_head(token_embeddings)
+    
+    
+    
+#==============================================================================
+def train_BERT_model(betterbert,epoch,lr,trainingtestingsplit):
+    pass
+    
+    
+    
+    
+#==============================================================================
+if __name__ == "__main__":
+    train_BERT_model()
