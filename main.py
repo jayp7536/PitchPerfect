@@ -1,43 +1,49 @@
 # WHO= everyone?
 #   main script
-#       insert:
-#           - what model (tf-idf, ngram with what as n)
-#           - epochs
-#           - learning rate
 from metrics import *
-from dataloader import dataloaderLANG
-from ngram import ngramModel
-from tfidf import tfidfModel
-from LLM import LLM_Model,LLMBERT_Model
-
-
-modeltype=0
-epochs=10
-learningrate=0.1
-trainingtestingsplit=0.7
+from ngram import train_ngram_model
+from tfidf import train_tfidf_model
+from LLM import train_BERT_model
+from combined import train_combined_model
 
 
 
-#   load model
-if   modeltype==-2: model= LLM_Model() #LLM
-elif modeltype==-1: model= LLMBERT_Model() #LLM-BERT
-elif modeltype== 0: model= tfidfModel() #tf-idf
-else:               model= ngramModel(modeltype) #n-gram, pass modeltype as n
+#change manually
+MODELTYPE=0
+# N=2
+EPOCHS=10
+# learningrate=0.1
+TRAINTESTSPLIT=0.7
+IFJONAH=False
 
 
-#   load dataloader
-dataloader= dataloaderLANG(trainingtestingsplit)
 
 
-#   training cycle of model (training split)
-for TrainX,TrainY in zip(dataloader.TrainX,dataloader.TrainY):
-    pass
-
-
-#   run model on testsing split
-for TestX,TestY in zip(dataloader.TrainX,dataloader.TrainY):
-    pass
-
-
-#   get metrics
-print('a')
+if __name__ == "__main__":
+    if MODELTYPE==-1:
+        train_BERT_model(betterbert=IFJONAH, epoch=EPOCHS,lr=0.01,    datasplit=TRAINTESTSPLIT) #LLM-BERT
+        train_BERT_model(betterbert=IFJONAH, epoch=EPOCHS,lr=0.001,   datasplit=TRAINTESTSPLIT) #LLM-BERT
+        train_BERT_model(betterbert=IFJONAH, epoch=EPOCHS,lr=0.0001,  datasplit=TRAINTESTSPLIT) #LLM-BERT
+        train_BERT_model(betterbert=IFJONAH, epoch=EPOCHS,lr=0.00001, datasplit=TRAINTESTSPLIT) #LLM-BERT
+        train_BERT_model(betterbert=IFJONAH, epoch=EPOCHS,lr=0.000001,datasplit=TRAINTESTSPLIT) #LLM-BERT
+    
+    elif MODELTYPE== 0:
+        train_tfidf_model   (n=1, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_tfidf_model   (n=2, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_tfidf_model   (n=3, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_tfidf_model   (n=4, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_tfidf_model   (n=5, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+    
+    elif MODELTYPE== 1:
+        train_ngram_model(n=1, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_ngram_model(n=2, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_ngram_model(n=3, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_ngram_model(n=4, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_ngram_model(n=5, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+    
+    elif MODELTYPE== 2:
+        train_combined_model(n=1, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_combined_model(n=2, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_combined_model(n=3, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_combined_model(n=4, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
+        train_combined_model(n=5, epoch=EPOCHS,datasplit=TRAINTESTSPLIT)
