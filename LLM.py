@@ -4,7 +4,22 @@ from transformers import BertTokenizer, BertModel
 import torch
 from dataloader import dataloaderLANG
 import torch.nn.functional as F
+import numpy as np
+import time
+from sklearn.metrics import roc_auc_score, accuracy_score, classification_report
+import torch.optim as optim
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 from jeb382private import Bertize #private file
+
+
+
+
+#helper func
+def focal_loss(outputs, targets, alpha=0.25, gamma=2.0):
+    ce_loss = F.cross_entropy(outputs, targets, reduction='none')
+    pt = torch.exp(-ce_loss)  # Probabilities of the true classes
+    focal_loss = alpha * (1 - pt) ** gamma * ce_loss
+    return focal_loss.mean()
 
 
 
@@ -17,7 +32,7 @@ class Squeezer(torch.nn.Module):
 
 
 
-#==============================================================================
+#============================================================================================================================================================
 #idk waht to do with this tbh, looking into another LLM
 #TODO: (jonah) do end of hw3 but here
 class LLM_Model():
@@ -27,6 +42,21 @@ class LLM_Model():
     
     
 #==============================================================================
+def train_LLM_model(epoch=1,lr=0.01,datasplit=0.7):
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
+#============================================================================================================================================================
 #BERT LLM model
 class LLMBERT_Model(torch.nn.Module):
     def __init__(self,num_classes=20, betterbert=False):
@@ -77,22 +107,6 @@ class LLMBERT_Model(torch.nn.Module):
     
     
 #==============================================================================
-import numpy as np
-import time
-from sklearn.metrics import roc_auc_score, accuracy_score, classification_report
-import torch.optim as optim
-from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
-
-
-
-#helper func
-def focal_loss(outputs, targets, alpha=0.25, gamma=2.0):
-    ce_loss = F.cross_entropy(outputs, targets, reduction='none')
-    pt = torch.exp(-ce_loss)  # Probabilities of the true classes
-    focal_loss = alpha * (1 - pt) ** gamma * ce_loss
-    return focal_loss.mean()
-
-
 def train_BERT_model(betterbert=False,epoch=1,lr=0.01,datasplit=0.7):
     print('load data')
     data = dataloaderLANG(datasplit)
@@ -132,15 +146,13 @@ def train_BERT_model(betterbert=False,epoch=1,lr=0.01,datasplit=0.7):
             running_loss += loss.item()
             
             y_true.append(labels.item())
-            # y_pred.append(torch.softmax(outputs, dim=0).detach().cpu().numpy())
-            y_pred = np.argmax(outputs, axis=0)
+            y_pred.append( torch.argmax(outputs, dim=0) )
 
-        # Compute AUC
         acc_train = accuracy_score(  np.array(y_true), np.array(y_pred)  )
         train_loss = running_loss / len(X_train)
         #----------
         stopwatch=time.monotonic()-stopwatch
-        print(  f"Epoch [{current_epoch + 1}/{epoch}]  -  Train Loss: {train_loss:.5f}  -  Train AU\CC: {acc_train:.5f}  -  {(stopwatch/60):.4f}m")    #jeb382
+        print(  f"Epoch [{current_epoch + 1}/{epoch}]  -  Train Loss: {train_loss:.5f}  -  Train ACC: {acc_train:.5f}  -  {(stopwatch/60):.4f}m")    #jeb382
         scheduler.step()
     
     
@@ -154,8 +166,8 @@ def train_BERT_model(betterbert=False,epoch=1,lr=0.01,datasplit=0.7):
     with torch.no_grad():
         for input, labels in zip(X_val[:5],y_val[:5]):
             outputs = model(input)
-            y_true.append(torch.tensor(labels).to(torch.long).cpu().numpy().item()) #way to long but cant be bothered to fix
-            y_pred.append(torch.softmax(outputs, dim=0).detach().cpu().numpy())
+            y_true.append(labels)
+            y_pred.append( torch.argmax(outputs, dim=0) )
     y_true=np.array(y_true)
     y_pred=np.array(y_pred)
     
@@ -166,11 +178,19 @@ def train_BERT_model(betterbert=False,epoch=1,lr=0.01,datasplit=0.7):
     #===============
     print(f"MODEL: BERT   -   better?={betterbert}")
     print("Accuracy:", accuracy_score(y_true, y_pred))
-    print(classification_report(y_true, y_pred, target_names=data.encoder.classes_))
-    
-    
-    
-    
-#==============================================================================
+    print(  classification_report(y_true, y_pred, labels=np.arange(20), target_names=data.encoder.classes_)  )
+
+
+
+
+
+
+
+
+
+
+
+
+#============================================================================================================================================================
 if __name__ == "__main__":
     train_BERT_model()
