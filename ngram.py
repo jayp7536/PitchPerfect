@@ -35,21 +35,21 @@ def train_ngram_model(n=2, epoch=1000, datasplit=0.7):
     # -----------------------------
     # PRINT CONFUSION MATRIX IN TERMINAL
     # -----------------------------
-    # print_conf_matrix(
-    # y_val,
-    # pred,
-    # class_names=data.encoder.classes_
-    # )
+    print_conf_matrix(
+    y_val,
+    pred,
+    class_names=data.encoder.classes_
+    )
 
     # -----------------------------
     # SHOWS CONFUSION MATRIX IN NEW WINDOW (VISUAL)
     # -----------------------------
-    evaluate_model(
-    y_val,
-    pred,
-    class_names=data.encoder.classes_,
-    model_name="UNIGRAM + BIGRAM BOW"
-    )
+    # evaluate_model(
+    # y_val,
+    # pred,
+    # class_names=data.encoder.classes_,
+    # model_name="UNIGRAM + BIGRAM BOW"
+    # )
     
     return model, vectorizer
 
