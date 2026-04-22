@@ -59,21 +59,21 @@ def train_combined_model(n=2, epoch=1000, datasplit=0.7):
     # PRINT CONFUSION MATRIX IN TERMINAL
     # -----------------------------
 
-    # print_conf_matrix(
-    # y_val,
-    # pred,
-    # class_names=data.encoder.classes_
-    # )
+    print_conf_matrix(
+    y_val,
+    pred,
+    class_names=data.encoder.classes_
+    )
 
     # -----------------------------
     # SHOWS CONFUSION MATRIX IN NEW WINDOW (VISUAL)
     # -----------------------------
-    evaluate_model(
-    y_val,
-    pred,
-    class_names=data.encoder.classes_,
-    model_name="MODEL: COMBINED WORD + CHARACTER N-GRAMS"
-    )
+    # evaluate_model(
+    # y_val,
+    # pred,
+    # class_names=data.encoder.classes_,
+    # model_name="MODEL: COMBINED WORD + CHARACTER N-GRAMS"
+    # )
     
     return model, word_vectorizer, char_vectorizer
 
