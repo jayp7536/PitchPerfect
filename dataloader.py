@@ -71,14 +71,20 @@ class dataloaderLANG():
     def clean_text(self, text):
         text = text.lower()
 
-        #remove bracketed text
+        # remove bracketed text
         text = re.sub(r"\[.*?\]", "", text)
-        #remove newlines
-        text = text.replace("\n", " ")
-        #remove punctuation 
-        text = re.sub(r"[^\w\s]", "", text)
-        # remove extra spaces
-        text = re.sub(r"\s+", " ", text).strip()
+
+        # normalize newlines 
+        text = re.sub(r"\n+", "\n", text)
+
+        # remove punctuation 
+        text = re.sub(r"[^\w\s\n]", "", text)
+
+        # remove extra spaces 
+        text = re.sub(r"[ ]+", " ", text)
+
+        # strip leading/trailing whitespace
+        text = text.strip()
 
         return text
 
