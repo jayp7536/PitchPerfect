@@ -94,11 +94,14 @@ if __name__ == "__main__":
     print("Validation size:", len(data.ValX))
     print("Test size:", len(data.TestX))
 
+    import random #Shows sample of a random entry
+    idx = random.randint(0, len(data.TrainX)-1)
+
     print("\n#------------------------------------------------- SAMPLE INPUT #-------------------------------------------------")
-    print(list(data.TrainX)[0])
+    print(list(data.TrainX)[idx])
 
     print("\n#------------------------------------------------- LABEL INFO #-------------------------------------------------")
-    print("Encoded label:", data.TrainY[0])
-    print("Actual artist:", data.encoder.inverse_transform([data.TrainY[0]])[0])
+    print("Encoded label:", data.TrainY[idx])
+    print("Actual artist:", data.encoder.inverse_transform([data.TrainY[idx]])[0])
 
     print("\n#-------------------------------------------------#")
