@@ -10,27 +10,35 @@ from metrics import evaluate_model, print_conf_matrix
 
 #note: can you add an option for n? ie: 2-gram 3-gram etc  -jonah
 #   also include args for epochs, trainingtestingsplit
-def train_tfidf_model():
+def train_tfidf_model(n=4, epoch=1000, datasplit=0.7):
+    data = dataloaderLANG(datasplit)
     # Load data
-    data = dataloaderLANG()
     X_train, y_train = data.TrainX, data.TrainY
     X_val, y_val = data.ValX, data.ValY
 
     # -----------------------------
     # MODEL: TF-IDF Character N-Grams
     # -----------------------------
-    vectorizer = TfidfVectorizer(max_features=10000, analyzer='char', ngram_range=(2, 4))
+    # char n-grams
+    if n < 2:
+        n = 2
+
+    vectorizer = TfidfVectorizer(
+        max_features=10000,
+        analyzer="char",
+        ngram_range=(2, n)
+    )
     X_train_tfidf = vectorizer.fit_transform(X_train)
     X_val_tfidf = vectorizer.transform(X_val)
 
-    model = LogisticRegression(max_iter=1000)
+    model = LogisticRegression(max_iter=epoch)
     model.fit(X_train_tfidf, y_train)
 
     pred = model.predict(X_val_tfidf)
 
-    print("MODEL: TF-IDF CHARACTER N-GRAMS")
-    print("Accuracy:", accuracy_score(y_val, pred))
-    print(classification_report(y_val, pred, target_names=data.encoder.classes_))
+    # print("MODEL: TF-IDF CHARACTER N-GRAMS")
+    # print("Accuracy:", accuracy_score(y_val, pred))
+    # print(classification_report(y_val, pred, target_names=data.encoder.classes_))
 
     # -----------------------------
     # PRINT CONFUSION MATRIX IN TERMINAL
