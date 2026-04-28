@@ -10,6 +10,10 @@ from sklearn.metrics import roc_auc_score, accuracy_score, classification_report
 import torch.optim as optim
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 from jeb382private import Bertize #private file
+from transformers import AutoTokenizer, AutoModel
+from sklearn.metrics import classification_report, f1_score
+import torch
+
 
 
 
@@ -35,14 +39,37 @@ class Squeezer(torch.nn.Module):
 #============================================================================================================================================================
 #idk waht to do with this tbh, looking into another LLM
 #TODO: (jonah) do end of hw3 but here
-class LLM_Model():
-    def __init__(self):
-        pass
-    
+class LLM_Model(torch.nn.Module):
+    def __init__(self, num_classes=20):
+        super().__init__()
+
+        self.tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+        self.model = AutoModel.from_pretrained("distilbert-base-uncased")
+
+        # simple classifier
+        self.classifier = torch.nn.Linear(768, num_classes)
+
+    def forward(self, text):
+        inputs = self.tokenizer(
+            text,
+            return_tensors="pt",
+            truncation=True,     
+            padding="max_length",
+            max_length= 128
+        )
+
+        outputs = self.model(**inputs)
+
+        # take CLS token
+        pooled = outputs.last_hidden_state.mean(dim=1)
+
+        logits = self.classifier(pooled)
+
+        return logits.squeeze(0)
     
     
 #==============================================================================
-def train_LLM_model(epoch=1,lr=0.01,datasplit=0.7):
+def train_LLM_model(epoch=1,lr=1e-4,datasplit=0.7):
     pass
 
 
@@ -118,67 +145,57 @@ def train_BERT_model(betterbert=False,epoch=1,lr=0.01,datasplit=0.7):
     #===============        Note batchsize=1s
     #   training
     #===============
-    print('load model')
-    model = LLMBERT_Model(betterbert=betterbert)
-    optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
-    criterion = lambda outputs, targets: focal_loss(outputs, targets, alpha=0.25, gamma=2.0)# 0.05 8.0 gave best at 0.83 AUC
-    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2) #was 10 and 2
-    
-    print('epoching')
-    for current_epoch in range(epoch):
-        stopwatch = time.monotonic()    #jeb382
-        #----------
-        model.train()
-        running_loss = 0.0
-        y_true = []
-        y_pred = []
+def train_LLM_model(epoch=1, lr=1e-4, datasplit=0.7):
+    print("load data")
+    data = dataloaderLANG(datasplit)
 
-        for idx,(input, labels) in enumerate(zip(X_train[:5],y_train[:5])):
-            # print(f'epoch= {current_epoch}   {idx}/50')
-            optimizer.zero_grad()
-            
-            outputs = model(input)
-            labels = torch.tensor(labels).to(torch.long)
-            
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-            running_loss += loss.item()
-            
-            y_true.append(labels.item())
-            y_pred.append( torch.argmax(outputs, dim=0) )
+    X_train, y_train = data.TrainX, data.TrainY
+    X_val, y_val = data.ValX, data.ValY
 
-        acc_train = accuracy_score(  np.array(y_true), np.array(y_pred)  )
-        train_loss = running_loss / len(X_train)
-        #----------
-        stopwatch=time.monotonic()-stopwatch
-        print(  f"Epoch [{current_epoch + 1}/{epoch}]  -  Train Loss: {train_loss:.5f}  -  Train ACC: {acc_train:.5f}  -  {(stopwatch/60):.4f}m")    #jeb382
-        scheduler.step()
-    
-    
-    
-    #===============
-    #   validation
-    #===============
+    print("load model")
+    model = LLM_Model(num_classes=len(data.encoder.classes_))
+
+    optimizer = optim.AdamW(model.classifier.parameters(), lr=lr)
+    criterion = torch.nn.CrossEntropyLoss()
+
+    print("training...")
+
+    model.train()
+    total_loss = 0
+
+    for text, label in zip(X_train[:200], y_train[:200]):
+        optimizer.zero_grad()
+
+        outputs = model(text)
+
+        loss = criterion(
+            outputs.unsqueeze(0),
+            torch.tensor([label])
+        )
+
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+    print(f"Epoch 1 Loss: {total_loss:.4f}")
+
+    # ===== validation =====
     model.eval()
     y_true = []
     y_pred = []
+
     with torch.no_grad():
-        for input, labels in zip(X_val[:5],y_val[:5]):
-            outputs = model(input)
-            y_true.append(labels)
-            y_pred.append( torch.argmax(outputs, dim=0) )
-    y_true=np.array(y_true)
-    y_pred=np.array(y_pred)
-    
-    
-    
-    #===============
-    #   metrics
-    #===============
-    print(f"MODEL: BERT   -   better?={betterbert}")
+        for text, label in zip(X_val[:100], y_val[:100]):
+            outputs = model(text)
+
+            y_true.append(label)
+            y_pred.append(torch.argmax(outputs).item())
+
+    print("\n#----------- LLM RESULTS -----------#")
     print("Accuracy:", accuracy_score(y_true, y_pred))
-    print(  classification_report(y_true, y_pred, labels=np.arange(20), target_names=data.encoder.classes_)  )
+    print("Macro F1:", f1_score(y_true, y_pred, average="macro"))
+    print("#----------------------------------#")
 
 
 
@@ -193,4 +210,4 @@ def train_BERT_model(betterbert=False,epoch=1,lr=0.01,datasplit=0.7):
 
 #============================================================================================================================================================
 if __name__ == "__main__":
-    train_BERT_model()
+    train_LLM_model()
